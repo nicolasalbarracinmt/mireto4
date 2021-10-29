@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <title>Inicio Reservas</title>
+    
+</head>
+<style>
+    *{
+        margin:0;
+        padding:0;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+    body{
+        background-image: url(./img/fondo3.jpg);
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position-y: -200px;  
+    }
+    .container_btns{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .container_btns input{
+        padding:15px 50px;
+        font-size: 18px;
+        margin:50px 10px 0px 10px;
+        border-radius: 6px;
+        border:2px solid transparent;
+        background-color: #a6b2c0;
+        color:white;
+        border:2px solid #ffffff;
+    }
+    .container_btns input:hover{
+        border:2px solid #c95028;
+        
+        box-shadow: 0px 0px 10px #8d8d8d;
+    }
+    h1{
+        margin: 70px 0 20px;
+        letter-spacing: 3px;
+        font-size: 50px;
+        text-align: center;
+        font-family:serif;
+        text-shadow: 0px 0px 20px  #546985;
+        color:white;
+    }
+    table{
+        display: flex;
+        justify-content: center;
+        width:400px;
+        margin:0px auto 15px;
+    }
+    table:first-child{
+        display: flex;
+        justify-content: center;
+        margin:0 auto;
+        margin-top:30px ;
+    }
+    td{
+        width: 200px;
+        height: 40px;
+        text-align: center;
+        border: 1px solid black;   
+    }
+    td input{
+        width:70% ;
+        padding:5px;
+        border:none;
+        outline: none;
+        border:2px solid #bebebe;
+        border-radius: 6px;
+    }
+    td input:hover{
+        border:2px solid #794939;
+        box-shadow: 0px 0px 5px #8d8d8d;
+    }
+    .container_table tr input {
+        padding:2px 10px;
+        width:auto;
+        position: absolute;
+        margin-left: 95px;  
+    }
+    .container_table_in1,.container_table_in2{
+        display:none;  
+    }
+    .container_dates_in{
+        display: none;
+    }
+</style>
+<body>
+        <h1>HOTEL </h1>
+    <main>
+        <div class="container_btns">
+            <input type="button" value="Ver Clientes" id="clientes" class = 'btn'>
+
+            <a href="agregarClient.html">
+                <input type="button" value="Agregar Cliente"></a>
+            
+            <a href="agregarAdmi.html">
+                <input type="button" value="Agregar Administrador"></a>
+    
+            <input type="button" value="Ver Habitaciones" id="habitaciones" class = 'btn'>
+            
+            <a href="agregarRoom.html">
+                <input type="button" value="Agregar Habitación"></a>
+                
+            <a href="crearReserva.html">
+                <input type="button" value="Crear Reserva"></a>
+
+            <a href="crearCategoria.html">
+                <input type="button" value="Crear Categoria"></a>
+
+            <a href="mensaje.html">
+                <input type="button" value="Enviar Mensaje"></a>
+                
+                <input type="button" value="Ver Mensajes" id="verMensaje">
+        </div>
+        <div>
+            <table>
+                <tr class="container_table_in1">
+                    <td>ID</td>
+                    <td>Nombre</td>
+                </tr>
+                <tr class="container_table_in2">
+                    <td>Id Cliente</td>
+                    <td>Habitaicion</td>
+                    <td>Mensaje</td>
+                </tr>
+            </table>
+            <table class="container_table" id="container_table_id">
+                
+            </table>
+        </div>
+    </main>
+    <script>
+
+
+        var verClientesBtn= document.getElementById("clientes");
+        var verHabitacionesBtn= document.getElementById("habitaciones");
+        var verMensajesBtn = document.getElementById("verMensaje")
+        var container_table_id = document.getElementById("container_table_id")
+
+        var container_table_in = document.querySelector(".container_table_in")
+        var container_table_in1 = document.querySelector(".container_table_in1")
+        var container_table_in2 = document.querySelector(".container_table_in2")
+
+        //###########################################
+        verMensajesBtn.addEventListener("click",function(){
+            console.log("holaaa");
+            container_table_in2.style = "display:block"
+            container_table_id.innerHTML = ""
+            let ajaxMensaje = $.ajax({
+                method:"GET",
+                url:"http://129.151.118.47:8080/api/Message/all"
+            })
+            ajaxMensaje.done(function(g) {
+                let array1 = []
+                for (let i = 0; i <= g.length-1; i++) {
+                    array1.unshift(g[i]) 
+                }
+                array1.forEach(element => {
+                    console.log(element);
+                    /* ######falta colocar los valores adecuados para cada fila y cambiarle los
+                     valores de variables que estan entre comillas simples */
+                    container_table_id.innerHTML += '  <tr class=""><td>'+
+                        element.client.idClient+'</td><td>'+element.room.name+'<td>'+
+                        element.messageText+'</td>'
+                            '<a href="detallesClientes.html"><input type="button" value="Mod"></a></td></tr>'  
+                }); 
+                container_table_id.style = 'display:block';
+                console.log("datos obtenidos"); 
+                console.log(g);  
+            })
+            ajaxMensaje.fail(function(g){
+                console.log("errrror" ,g);
+            })
+        })
+        //###########################################
+            verClientesBtn.addEventListener("click",function(){
+            container_table_in1.style = "display:block"
+            container_table_id.innerHTML = ""
+            let ajaxCliente = $.ajax({
+                method:"GET",
+                url:"http://129.151.118.47:8080/api/Client/all"
+            })
+            ajaxCliente.done(function(g) {
+                let array1 = []
+                for (let i = g.length-1; i >= 0; i--) {
+                    array1.unshift(g[i]) 
+                }
+                array1.forEach(element => {
+                    console.log(element);
+                    container_table_id.innerHTML += '  <tr class=""><td>'+
+                        element.idClient+'</td><td>'+element.name+
+                            '<a href="detallesClientes.html">' +'<input type="button" value="Modificar">'+'</a></td></tr>' 
+                }); 
+                container_table_id.style = 'display:block';
+                console.log("datos obtenidos");   
+            })
+            ajaxCliente.fail(function(g){
+                console.log("errrror" ,g);
+            })
+        })
+
+
+
+        //falta hacer ajax para poder ver las habitaciones
+        verHabitacionesBtn.addEventListener("click",function(){
+            container_table_in1.style = 'display:block';
+        })
+
+        verHabitacionesBtn.addEventListener("click",function(){
+            container_table_in1.style = "display:block"
+            container_table_id.innerHTML = ""
+            let ajaxHabitaciones = $.ajax({
+                method:"GET",
+                url:"http://129.151.118.47:8080/api/Room/all"
+            })
+            ajaxHabitaciones.done(function(g) {
+                let array1 = []
+                for (let i = g.length-1; i >= 0; i--) {
+                    array1.unshift(g[i]) 
+                }
+                array1.forEach(element => {
+                    console.log(element);
+                    console.log("sirves");
+                    container_table_id.innerHTML += '  <tr class=""><td>'+element.id+'</td><td>'+element.name+'<a href="detallesRoom.html"><input type="button" value="Modificar"></a>'+'</td></tr>'  
+                }); 
+                container_table_id.style = 'display:block';
+                console.log("datos obtenidos");
+                console.log(g);   
+            })
+            ajaxHabitaciones.fail(function(g){
+                console.log("errrror" ,g);
+            })
+        })
+        //falta hacer ajax para poder ver las habitaciones
+        verHabitacionesBtn.addEventListener("click",function(){
+            container_table_in1.style = 'display:block';
+        })
+    </script>
+    </body>
+</html>

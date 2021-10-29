@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="jquery-3.6.0.min.js"> </script>
+    <link rel="stylesheet" href="style.css">
+
+    <title>Habitaciones</title>
+</head>
+<style>
+    *{
+        margin:0;
+        padding:0;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+    .container_form{
+        display:flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+    .container_form form div:first-child{
+        margin-top: 30px;
+    }
+     .container_form form div{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 20px;
+    } 
+    .container_form h3{
+        font-size: 40px;
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 40px 0px 10px;
+        text-transform: capitalize;
+    }
+    form input{
+        padding:10px 15px;
+        margin:0 5px;
+        outline: none;
+        border:2px solid #bebebe;
+        border-radius: 6px; 
+    }
+    form input:active{
+        border:2px solid #4d7ce0;
+    }
+    form .btn{
+        border:none;
+        border-radius: 6px;
+        border:2px solid transparent;
+        cursor: pointer;
+        outline: none;
+        background-color: #dbdbdb;
+    }
+    form .btn:hover {
+        border:2px solid #4d7ce0;
+        box-shadow: 0px 0px 7px #b3b3b3;
+    }
+     th, td {
+      border:1px solid black; 
+    }
+    table{
+        display: flex;
+        justify-content: center;
+        margin:0 auto;  
+    }
+    table:first-child{
+        display: flex;
+        justify-content: center;
+        margin:0 auto;
+        margin-top:30px ;
+    }
+    td{
+        width: 130px;
+        height: 40px;
+        text-align: center;
+    }
+    input[type=number]{
+        background-color: #b8b8b8;
+        border:none;
+        width:40px;
+        height:24px;
+        outline: none;
+        padding-left:5px;
+    }
+    .container_tr{
+        /* para colocar la calificacion activar padding 130px */
+        /* padding-left: 130px; */
+    }
+</style>
+<body>
+    <a href="index.html"><input type="button" value="Volver al inicio" class="btn_volver"></a>
+    <div class="container_form">
+            <h1>Crear Reserva</h1>
+        <div>
+            <form action="" method="post">
+                <div>
+                    <input type="text" name="idCliente" id="idCliente" placeholder="Id cliente">
+                    <input type="text" name="nombreHabitacion" id="nombreHabitacion" placeholder="Nombre Habitacion">
+                    <input type="date"  name="fechaFinal" id="fechaFinal" placeholder="Fecha final"> 
+                        
+                </div>
+                <div>
+                    <input type="button" value="Subir datos" id="sendbtn" class='btn'>
+                    <input type="button" value="Obtener valores actuales" id="getbtn" class='btn'>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id = "container_table"></div>
+    <script>
+        var idCliente= document.getElementById('idCliente');
+        var nombreHabitacion= document.getElementById('nombreHabitacion');
+        function fechaAhora(){
+            var fecha = new Date()
+            var dia = fecha.getDate()
+            var mes = fecha.getMonth() +1
+            var año = fecha.getFullYear()
+            var fechaActual = año+"-"+mes+"-"+dia;
+            return fechaActual
+        }
+        var fechaInicial= fechaAhora();
+        var fechaFinal= document.getElementById('fechaFinal');
+        
+        //###var inputBtn = document.getElementById("inputBtn")
+        //###var calificarBtn = document.getElementById("calificarBtn")
+        
+        
+        var sendbtn= document.getElementById('sendbtn');
+        var getbtn= document.getElementById('getbtn');
+        const urlBase = "http://129.151.118.47:8080/api/"
+
+          
+        var container_table = document.getElementById('container_table');
+        containTable = "<table><tr><td>Id Reserva</td><td>Nombre habitacion</td><td>Fecha inicial"
+            +"</td><td>Fecha final</td></tr></table>"
+        container_table.innerHTML= containTable
+            
+        /* ##############################################
+        calificarBtn.addEventListener("click",function(){
+            //#########falta colocar el dato de calificacion 
+            //FALTA MIRAR SI EN LA BASE DE DATOS HAY CALIFICACION, SI NO TOCA VER QUE SE HACE CON ESTO
+            var calificacion = parseInt(inputNumber.value)
+            console.log("la calificacion es: "+calificacion);
+        })  */
+        
+        sendbtn.addEventListener("click",function(){
+            postDates();
+        })
+        getbtn.addEventListener("click",function(){
+            getDates();
+        })
+        
+        function getDates(){
+            const ajax = $.ajax({
+                method:"GET",
+                url:urlBase + 'Reservation/all'
+            })
+            ajax.done(function(g){
+                
+                container_table.innerHTML=""
+                container_table.innerHTML= containTable
+                
+                let array1 = []
+                for (let i = 0; i <= g.length-1; i++) {
+                    array1.push(g[i]) 
+                }
+                array1.forEach(element => {
+
+                    let fechaFormatStart = new Date(element.startDate).toLocaleDateString()
+                    let fechaFormatDevolution = new Date(element.devolutionDate).toLocaleDateString()
+
+                    container_table.innerHTML+=
+                    "<table class='container_tr'><tr><td>"+element.idReservation+
+                    "</td><td>"+element.room.name+"</td><td>"+fechaFormatStart+
+                    "</td><td>"+ fechaFormatDevolution+"</td></tr></table>"       
+                });      
+            })
+            ajax.fail(function(g){
+                console.log(g);
+                window.alert("Ocurrió un error en la consulta, intente de nuevo");
+            })
+        }
+
+    function postDates(){
+        
+        fetch(urlBase + '/Room/all')
+        .then(res => res.json())
+        .then(res => {
+
+            for(x of res){
+                if(x.name == nombreHabitacion.value){
+                    //realiza ajax
+                    var ajax = $.ajax({
+                    type:"POST",
+                    url:urlBase + 'Reservation/save',
+                    contentType: "application/json; charset=utf-8",
+                            dataType: 'JSON',
+                            data: JSON.stringify(
+                                {
+                                    startDate:fechaInicial,
+                                    devolutionDate:fechaFinal.value,
+                                    client:{idClient:parseInt(idCliente.value)},
+                                    room:{id:x.id}
+                                })
+                    })
+                    ajax.done(function(res){
+                        console.log("FINICIAL"+fechaFinal.value);
+                        console.log("FFINAL"+fechaInicial);
+                        console.log(res);
+                        alert('Datos cargados con éxito');
+                        
+                        idCliente.value=null;
+                        nombreHabitacion.value=null;
+                        fechaFinal.value=null;
+                    })
+                    ajax.fail(function(res){
+                        console.log(res);
+                        window.alert('Hubo un error al insertar los datos, intente de nuevo');
+                    })
+                }
+            }
+        })
+    } 
+    </script>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script src="jquery-3.6.0.min.js"> </script>
+    <title>Inicio Reservas</title>
+</head>
+<style>
+    *{
+        margin:0;
+        padding:0;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+    .container_form{
+        display:flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+    .container_form form div:first-child{
+        margin-top: 30px;
+    }
+     .container_form form div{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 20px;
+    } 
+
+
+    .container_form h3{
+        font-size: 40px;
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 40px 0px 10px;
+        text-transform: capitalize;
+    }
+    form input{
+        padding:10px 15px;
+        margin:0 5px;
+        outline: none;
+        border:2px solid #bebebe;
+        border-radius: 6px;
+        
+    }
+    form input:active{
+        border:2px solid #4d7ce0;
+
+    }
+    form .btn{
+        border:none;
+        border-radius: 6px;
+        border:2px solid transparent;
+        cursor: pointer;
+        outline: none;
+        background-color: #dbdbdb;
+    }
+    form .btn:hover {
+        border:2px solid #4d7ce0;
+        box-shadow: 0px 0px 7px #b3b3b3;
+    }
+    table{
+        display: flex;
+        justify-content: center;
+        max-width:600px;
+        margin:0 auto;
+      border:1px solid black;   
+    }
+    table:first-child{
+        display: flex;
+        justify-content: center;
+        margin:0 auto;
+        margin-top:30px ;
+    }
+    td{
+        width: 200px;
+        height: 40px;
+        text-align: center;  
+    }
+    tr{
+        border:1px solid black;
+    }
+</style>
+<body>
+    <a href="index.html"><input type="button" value="Volver al inicio" class="btn_volver"></a>
+    <div class="container_form">
+            <h1>Agregar Cliente</h1>
+        <div>
+            <form action="" method="post">
+                <div>
+                    <input type="text" name="nombre" id="nombre" placeholder="Nombre">
+                    <input type="text" name="correo" id="correo" placeholder="E-mail">
+                    <input type="password" name="contraseña" id="contraseña" placeholder="Contraseña">
+                    <input type="text" name="edad" id="edad" placeholder="Edad">
+
+                </div>
+                <div>
+                    <input type="button" value="Subir datos" id="sendbtn" class='btn'>
+                    <input type="button" value="Obtener valores actuales" id="getbtn" class='btn'>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id = "container_table"></div>
+
+    <script>
+        //############cambiar la url 
+        const urlBase = "http://129.151.118.47:8080/api/";
+        var id= document.getElementById('id');
+        var names= document.getElementById('nombre');
+        var emails= document.getElementById('correo');
+        var ages= document.getElementById('edad');
+        var contraseña= document.getElementById('contraseña');
+
+        var sendbtn= document.getElementById('sendbtn');
+        var getbtn= document.getElementById('getbtn');
+        
+            
+        //Table
+        var container_table= document.getElementById('container_table');
+        var contenidoHeaderTabla = "<table><tr><td>ID</td><td>Nombre</td><td>Correo"
+            +"</td><td>Edad</td><td>Mensajes</td><td>Reservaciones</td></tr></table>"
+        container_table.innerHTML= contenidoHeaderTabla 
+
+
+        sendbtn.addEventListener("click",function(){
+            postDates();
+        })
+        getbtn.addEventListener("click",function(){
+            getDates();
+        })
+        function getDates(){
+            //añadir los messages":[]
+            let ajax = $.ajax({
+                method:"GET",
+                url:urlBase + "Client/all",
+            })
+            ajax.done(function(g){
+                console.log(g);
+                container_table.innerHTML=""
+                container_table.innerHTML=
+                    contenidoHeaderTabla
+                let array1 = []
+                for (let i = 0; i <= g.length-1; i++) {
+                    array1.push(g[i]) 
+                }
+                let arrayMessages = []
+                let arrayReservations = []
+
+                array1.forEach(element => {
+                    //recorrido de mensajes
+                    console.log(element);
+                    for(let iMe = 0;iMe<= element.messages.length-1;iMe++){
+                        let mess = element.messages[iMe].messageText
+                        arrayMessages.push(mess)
+                    }
+                    //recorrido de reservaciones
+                    for(let iRe = 0;iRe<= element.reservations.length-1;iRe++){
+                        let reserv = new Date(element.reservations[iRe].startDate).toLocaleDateString()
+                        console.log(reserv);
+                        arrayReservations.push(reserv)
+                    }
+                    container_table.innerHTML+="<table class='default'><tr><td>"+element.idClient+"</td><td>"+element.name+"</td><td>"+element.email+"</td><td>"+element.age+"</td><td>"+arrayMessages+"</td><td style='word-wrap: break-word'>"+arrayReservations.length+"</td></tr></table>"           
+                });      
+            })
+            ajax.fail(function(g){
+                console.log(g);
+                alert("Ocurrió un error en la consulta, intente de nuevo");
+            })
+        }
+        function postDates(){
+            
+            let ajax = $.ajax({
+                method:"POST",
+                url:urlBase + "Client/save",
+                contentType: "application/json; charset=utf-8",
+                dataType: 'JSON',
+                data: JSON.stringify(
+                    {
+                        name:names.value,
+                        email:emails.value,
+                        password:contraseña.value,
+                        age:parseInt(ages.value)
+                    })
+            })
+            ajax.done(function(res){
+                window.alert('Datos cargados con éxito');
+                
+                id.value=null;
+                names.value=null;
+                emails.value=null;
+                ages.value = null;
+            })
+            ajax.fail(function(res){
+                console.log(res);
+                window.alert('Hubo un error al insertar los datos, intente de nuevo');
+            })
+        } 
+    </script>
+</body>
+</html>
